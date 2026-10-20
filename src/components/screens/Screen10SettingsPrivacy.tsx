@@ -21,13 +21,15 @@ interface Screen10SettingsPrivacyProps {
   onUpdateProfile: (updated: Partial<UserProfile>) => Promise<void>;
   onResetData: () => Promise<void>;
   onBack: () => void;
+  onOpenInstallModal?: () => void;
 }
 
 export const Screen10SettingsPrivacy: React.FC<Screen10SettingsPrivacyProps> = ({
   profile,
   onUpdateProfile,
   onResetData,
-  onBack
+  onBack,
+  onOpenInstallModal
 }) => {
   const [name, setName] = useState<string>(profile?.name || '');
   const [cycleLength, setCycleLength] = useState<number>(profile?.cycleLength || 28);
@@ -304,11 +306,40 @@ export const Screen10SettingsPrivacy: React.FC<Screen10SettingsPrivacyProps> = (
         </ul>
       </div>
 
-      {/* Data Management Actions */}
-      <div className="card" style={{ padding: '20px', marginBottom: 16 }}>
-        <h2 style={{ fontSize: '16px', color: '#30282B', marginBottom: 12, fontWeight: 600 }}>
-          Data Management
-        </h2>
+        {/* Install Web Application Card */}
+        <div className="card" style={{ padding: '20px', marginBottom: 0, border: '1px solid #E4C8CF', background: 'linear-gradient(135deg, #FFFFFF 0%, #FAF0F2 100%)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: '#FAF0F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Download size={18} color="#6F3347" />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '16px', color: '#30282B', fontWeight: 700 }}>
+                Download & Install App
+              </h2>
+              <span style={{ fontSize: '11px', color: '#6F3347', fontWeight: 600 }}>
+                Progressive Web App (PWA)
+              </span>
+            </div>
+          </div>
+          <p style={{ fontSize: '12px', color: '#81777B', lineHeight: 1.5, marginBottom: 14 }}>
+            Install CycleCare on your mobile home screen or computer desktop. Launch in full-screen with fast offline support and zero app store required.
+          </p>
+          <button
+            type="button"
+            onClick={onOpenInstallModal}
+            className="btn btn-primary"
+            style={{ width: '100%', justifyContent: 'center', fontSize: '13px', padding: '10px 16px' }}
+          >
+            <Download size={15} />
+            <span>Install CycleCare App</span>
+          </button>
+        </div>
+
+        {/* Data Management Actions */}
+        <div className="card" style={{ padding: '20px', marginBottom: 16 }}>
+          <h2 style={{ fontSize: '16px', color: '#30282B', marginBottom: 12, fontWeight: 600 }}>
+            Data Management
+          </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button

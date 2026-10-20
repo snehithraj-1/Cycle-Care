@@ -10,13 +10,15 @@ import {
   Monitor,
   ChevronLeft,
   ChevronRight,
-  Clock
+  Clock,
+  Download
 } from 'lucide-react';
 import type { AppScreen, UserProfile, PeriodEntry, ReminderItem, ReminderLog } from './types';
 import { db } from './db';
 import { calculateCycleStats, getTodayDateStr } from './services/cycleEngine';
 import { reminderEngine } from './services/reminderEngine';
 import { CycleCareLogo } from './components/illustrations/BotanicalDecor';
+import { InstallAppModal } from './components/InstallAppModal';
 
 // 10 Screens + Period History Manager
 import { Screen01Splash } from './components/screens/Screen01Splash';
@@ -43,6 +45,11 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'responsive' | 'simulator'>('responsive');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
+  // PWA Web App Download / Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installModalOpen, setInstallModalOpen] = useState<boolean>(false);
+  const [isInstalled, setIsInstalled] = useState<boolean>(false);
+
   // Modals / Overlays
   const [logPeriodOpen, setLogPeriodOpen] = useState<boolean>(false);
   const [logPeriodPrefillDate, setLogPeriodPrefillDate] = useState<string | undefined>(undefined);
@@ -52,6 +59,32 @@ export default function App() {
   const [editingReminder, setEditingReminder] = useState<ReminderItem | null>(null);
 
   const [activeAlarmReminder, setActiveAlarmReminder] = useState<ReminderItem | null>(null);
+
+  // PWA installation listener
+  useEffect(() => {
+    // Check if app is already running in standalone PWA mode
+    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
+      setIsInstalled(true);
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   // Load database state
   const loadData = useCallback(async () => {
@@ -258,6 +291,7 @@ export default function App() {
             }}
             onMarkReminderTaken={handleMarkTaken}
             onTriggerAlarmTest={(reminder) => setActiveAlarmReminder(reminder)}
+            onOpenInstallModal={() => setInstallModalOpen(true)}
           />
         );
       case 'calendar':
@@ -333,6 +367,7 @@ export default function App() {
             onUpdateProfile={handleUpdateProfile}
             onResetData={handleResetAllData}
             onBack={() => setCurrentScreen('dashboard')}
+            onOpenInstallModal={() => setInstallModalOpen(true)}
           />
         );
       default:
@@ -377,6 +412,13 @@ export default function App() {
           onDismiss={handleAlarmDismiss}
         />
       )}
+
+      <InstallAppModal
+        isOpen={installModalOpen}
+        onClose={() => setInstallModalOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onInstallSuccess={() => setIsInstalled(true)}
+      />
     </>
   );
 
@@ -573,6 +615,49 @@ export default function App() {
                 <PlusCircle size={16} />
                 <span>Log Period</span>
               </button>
+
+              {/* Install / Download App Sidebar Trigger */}
+              {!sidebarCollapsed ? (
+                <button
+                  onClick={() => setInstallModalOpen(true)}
+                  className="btn-soft"
+                  style={{
+                    width: '100%',
+                    marginTop: 8,
+                    fontSize: '12px',
+                    padding: '9px 14px',
+                    borderRadius: 14,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    color: '#6F3347',
+                    backgroundColor: '#FAF0F2',
+                    border: '1px solid #F2D8DC',
+                    cursor: 'pointer'
+                  }}
+                  title="Download and Install Web App"
+                >
+                  <Download size={14} />
+                  <span>{isInstalled ? 'App Installed' : 'Download App'}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setInstallModalOpen(true)}
+                  className="btn-icon"
+                  style={{
+                    width: 44,
+                    height: 44,
+                    marginTop: 8,
+                    borderRadius: 14,
+                    backgroundColor: '#FAF0F2',
+                    border: '1px solid #F2D8DC'
+                  }}
+                  title="Download and Install Web App"
+                >
+                  <Download size={16} color="#6F3347" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -648,6 +733,29 @@ export default function App() {
               >
                 <PlusCircle size={14} />
                 <span>Log Period</span>
+              </button>
+
+              {/* Download / Install Web App Button */}
+              <button
+                onClick={() => setInstallModalOpen(true)}
+                className="btn-soft"
+                style={{
+                  fontSize: '12px',
+                  padding: '7px 12px',
+                  borderRadius: 20,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  color: '#6F3347',
+                  backgroundColor: '#FAF0F2',
+                  border: '1px solid #F2D8DC',
+                  fontWeight: 600
+                }}
+                title="Download & Install Application"
+              >
+                <Download size={14} color="#6F3347" />
+                <span>{isInstalled ? 'App Installed' : 'Download App'}</span>
               </button>
 
               {/* Simulator Preview Toggle */}

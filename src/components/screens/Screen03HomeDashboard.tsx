@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Heart,
   Droplet,
-  ShieldCheck
+  ShieldCheck,
+  Download
 } from 'lucide-react';
 import type { UserProfile, PeriodEntry, ReminderItem, CycleStats } from '../../types';
 import { WreathCircle, FloralBranch } from '../illustrations/BotanicalDecor';
@@ -27,6 +28,7 @@ interface Screen03HomeDashboardProps {
   onOpenAddReminder: () => void;
   onMarkReminderTaken: (reminder: ReminderItem) => void;
   onTriggerAlarmTest: (reminder: ReminderItem) => void;
+  onOpenInstallModal?: () => void;
 }
 
 export const Screen03HomeDashboard: React.FC<Screen03HomeDashboardProps> = ({
@@ -38,7 +40,8 @@ export const Screen03HomeDashboard: React.FC<Screen03HomeDashboardProps> = ({
   onOpenLogPeriod,
   onOpenAddReminder,
   onMarkReminderTaken,
-  onTriggerAlarmTest
+  onTriggerAlarmTest,
+  onOpenInstallModal
 }) => {
   const hour = new Date().getHours();
   let greeting = 'Good morning';
@@ -142,6 +145,17 @@ export const Screen03HomeDashboard: React.FC<Screen03HomeDashboardProps> = ({
               <PlusCircle size={15} />
               Log Period
             </button>
+            {onOpenInstallModal && (
+              <button
+                onClick={onOpenInstallModal}
+                className="btn-icon"
+                aria-label="Download App"
+                title="Download & Install CycleCare App"
+                style={{ backgroundColor: '#FAF0F2', border: '1px solid #F2D8DC' }}
+              >
+                <Download size={18} color="#6F3347" />
+              </button>
+            )}
             <button
               onClick={() => onNavigate('settings')}
               className="btn-icon"

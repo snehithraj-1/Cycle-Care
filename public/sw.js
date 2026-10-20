@@ -1,10 +1,13 @@
 // CycleCare Service Worker for PWA Offline App Shell Resilience
-const CACHE_NAME = 'cyclecare-shell-v1';
+const CACHE_NAME = 'cyclecare-shell-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg'
+  '/favicon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -43,9 +46,9 @@ self.addEventListener('fetch', (event) => {
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
-        // Cache static JS/CSS/SVG assets
+        // Cache static JS/CSS/SVG/PNG/fonts assets
         const responseToCache = networkResponse.clone();
-        if (event.request.url.match(/\.(js|css|svg|woff2)$/)) {
+        if (event.request.url.match(/\.(js|css|svg|png|jpg|jpeg|webp|woff2|woff)$/)) {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
